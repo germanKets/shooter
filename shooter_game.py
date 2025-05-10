@@ -7,13 +7,52 @@ font.init()
 font1 = font.SysFont('Times New Roman', 30)
 font2 = font.SysFont('Times New Roman', 30)
 mixer.init()
-mixer.music.load('crazy.ogg')
-mixer.music.play()
+# mixer.music.load('crazy.ogg')
+# mixer.music.play()
 
 
 #окно
 window = display.set_mode((700, 500))
 display.set_caption('minicrysis')
+
+def init_game():
+    global main_player, villain1, villain2, villain3, villain, villain5, monsters, bullets, btn, game, finish, menu, clock, FPS, current_level_index, menu_channel, game_channel
+    main_player = Player('mainperson.png', 65, 65, 15, 50, 400)
+    villain1 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
+    villain2 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
+    villain3 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
+    villain4 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
+    villain5 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
+    monsters = sprite.Group()
+    monsters.add(villain1, villain2, villain3, villain4, villain5)
+    bullets = sprite.Group()
+    btn = GameSprite('images.png', 150, 80, 15, 50, 400)
+    game = True
+    finish = False
+    menu = True
+    clock = time.Clock()
+    FPS = 60
+    current_level_index = 0
+    # menu_channel = mixer.Channel(0)
+    # game_channel = mixer.Channel(1)
+    load_level(current_level_index)
+
+def update_game():
+    pass
+
+def draw_game():
+    screen.fill((0, 0, 0))
+    pygame.display.update()
+
+# def show_menu():
+#     game_channel.stop()
+#     menu_channel.play(mixer.Sound('menu_sound.ogg'), loops =-1)
+
+def main():
+    # menu_channel.stop()
+    game_channel.play(mixer.Sound('crazy.ogg'), loops =-1)
+
+
 
 #классы
 class GameSprite(sprite.Sprite):
@@ -64,16 +103,6 @@ class Bullet(GameSprite):
             self.kill()
 
 #персонажи
-main_player = Player('mainperson.png', 65, 65, 15, 50, 400)
-villain1 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
-villain2 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
-villain3 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
-villain4 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
-villain5 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
-monsters = sprite.Group()
-monsters.add(villain1, villain2, villain3, villain4, villain5)
-bullets = sprite.Group()
-btn = GameSprite('images.png', 150, 80, 15, 50, 400)
 
 #смена уровней
 levels = [
@@ -82,7 +111,6 @@ levels = [
     {"enemy_count": 15}
 ]
 
-current_level_index = 0
 
 def load_level(level_index):
     global monsters, lost, dead
@@ -98,7 +126,7 @@ def load_level(level_index):
 def check_level_complete():
     return len(monsters) == 0
 
-load_level(current_level_index)
+
 
 
 
@@ -112,11 +140,7 @@ background1 = transform.scale(
     (700, 500)
 )
 
-game = True
-finish = False
-menu = True
-clock = time.Clock()
-FPS = 60
+
 
 
 win = font2.render(
@@ -126,9 +150,13 @@ lose = font2.render(
     'YOU LOSE!', True, (255, 0, 0)
 )
 
+
+init_game()
+
 #игровой цикл
 while game:
     if menu:
+        # show_menu()
         window.blit(background1, (0, 0))
         btn.reset()
         for e in event.get():
@@ -141,6 +169,7 @@ while game:
 
 
     if finish == False and menu == False:
+        main()
         window.blit(background, (0, 0))
         main_player.reset()
         main_player.update()
@@ -176,6 +205,10 @@ while game:
                     game = False
                 if e.type == MOUSEBUTTONDOWN:
                     main_player.fire()
+                if e.type == KEYDOWN:
+                    if e.key == K_r:
+                        init_game() 
+
 
     #проверка завершения уровня
         if check_level_complete():
@@ -192,5 +225,9 @@ while game:
         for e in event.get():
             if e.type == QUIT:
                 game = False
+            if e.type == KEYDOWN:
+                    if e.key == K_r:
+                        init_game() 
+
     display.update()
     clock.tick(FPS)
