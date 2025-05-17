@@ -7,16 +7,17 @@ font.init()
 font1 = font.SysFont('Times New Roman', 30)
 font2 = font.SysFont('Times New Roman', 30)
 mixer.init()
-# mixer.music.load('crazy.ogg')
-# mixer.music.play()
-
+menu_channel = mixer.Channel(0)
+game_channel = mixer.Channel(1)
+menu_music = mixer.Sound('menu_sound.ogg')
+game_music = mixer.Sound('crazy.ogg')
 
 #окно
 window = display.set_mode((700, 500))
 display.set_caption('minicrysis')
 
 def init_game():
-    global main_player, villain1, villain2, villain3, villain, villain5, monsters, bullets, btn, game, finish, menu, clock, FPS, current_level_index, menu_channel, game_channel
+    global main_player, villain1, villain2, villain3, villain, villain5, monsters, bullets, btn, game, finish, menu, clock, FPS, current_level_index
     main_player = Player('mainperson.png', 65, 65, 15, 50, 400)
     villain1 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
     villain2 = Enemy('villain.png', 65, 65, randint(1, 3), randint(0, 635), 0)
@@ -33,8 +34,6 @@ def init_game():
     clock = time.Clock()
     FPS = 60
     current_level_index = 0
-    # menu_channel = mixer.Channel(0)
-    # game_channel = mixer.Channel(1)
     load_level(current_level_index)
 
 def update_game():
@@ -44,13 +43,15 @@ def draw_game():
     screen.fill((0, 0, 0))
     pygame.display.update()
 
-# def show_menu():
-#     game_channel.stop()
-#     menu_channel.play(mixer.Sound('menu_sound.ogg'), loops =-1)
+def show_menu():
+    global menu_channel, game_channel
+    game_channel.stop()
+    menu_channel.play(menu_music, loops =-1)
 
 def main():
-    # menu_channel.stop()
-    game_channel.play(mixer.Sound('crazy.ogg'), loops =-1)
+    global menu_channel, game_channel
+    menu_channel.stop()
+    game_channel.play(game_music, loops =-1)
 
 
 
@@ -102,7 +103,7 @@ class Bullet(GameSprite):
         if self.rect.y <=0:
             self.kill()
 
-#персонажи
+
 
 #смена уровней
 levels = [
@@ -153,10 +154,10 @@ lose = font2.render(
 
 init_game()
 
+show_menu()
 #игровой цикл
 while game:
     if menu:
-        # show_menu()
         window.blit(background1, (0, 0))
         btn.reset()
         for e in event.get():
@@ -166,10 +167,9 @@ while game:
                     x, y = e.pos
                     if btn.rect.collidepoint(x, y):
                         menu = False
-
+                        main()
 
     if finish == False and menu == False:
-        main()
         window.blit(background, (0, 0))
         main_player.reset()
         main_player.update()
@@ -227,7 +227,8 @@ while game:
                 game = False
             if e.type == KEYDOWN:
                     if e.key == K_r:
-                        init_game() 
+                        init_game()
+                        show_menu()
 
     display.update()
     clock.tick(FPS)
